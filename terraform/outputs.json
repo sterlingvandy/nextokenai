@@ -1,0 +1,28 @@
+{
+  "databricks_user": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "acl_principal_id": "string",
+        "alphanumeric": "string",
+        "external_id": "string",
+        "home": "string",
+        "id": "string",
+        "repos": "string",
+        "user_name": "string",
+        "workspace_url": "string"
+      }
+    ],
+    "value": {
+      "acl_principal_id": "users/sean@nextokenai.com",
+      "alphanumeric": "sean",
+      "external_id": "",
+      "home": "/Users/sean@nextokenai.com",
+      "id": "78252915447294",
+      "repos": "/Repos/sean@nextokenai.com",
+      "user_name": "sean@nextokenai.com",
+      "workspace_url": "https://sterlingvandy.databricks.com"
+    }
+  }
+}
