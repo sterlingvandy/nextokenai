@@ -1,1 +1,2 @@
 # Requirements for example1
+requests>=2.28
