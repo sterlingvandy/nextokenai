@@ -12,6 +12,11 @@ import json
 import os
 import sys
 
+try:
+    import jmespath
+except Exception:
+    jmespath = None
+
 
 def get_by_path(obj, path: str):
     """Resolve a dotted path like 'a.b.c' against a nested dict/list structure."""
@@ -34,6 +39,7 @@ def main():
     parser = argparse.ArgumentParser(description='Query sample Databricks user JSON')
     parser.add_argument('--sample-file', '-f', default=os.path.join(os.path.dirname(__file__), 'sample_user.json'))
     parser.add_argument('--query', '-q', default='user_name', help='Dot-path query (default: user_name)')
+    parser.add_argument('--jmes', '-j', dest='jmes', help='JMESPath expression to evaluate against the JSON')
     args = parser.parse_args()
 
     try:
@@ -42,6 +48,20 @@ def main():
     except Exception as e:
         print(f"Failed to read sample file '{args.sample_file}': {e}", file=sys.stderr)
         sys.exit(1)
+
+    # If JMESPath expression provided, use that (requires jmespath package)
+    if args.jmes:
+        if jmespath is None:
+            print("JMESPath support not available; install with: pip install jmespath", file=sys.stderr)
+            sys.exit(3)
+        try:
+            res = jmespath.search(args.jmes, data)
+        except Exception as e:
+            print(f"JMESPath error: {e}", file=sys.stderr)
+            sys.exit(2)
+        # Normalize output with json.dumps for booleans/numbers/strings
+        print(json.dumps(res, indent=2))
+        sys.exit(0)
 
     try:
         res = get_by_path(data, args.query)
