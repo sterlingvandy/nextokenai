@@ -16,12 +16,13 @@ This script uses the `requests` package. Install with:
 import os
 import sys
 import json
+import argparse
 
 try:
     import requests
-except Exception as e:
-    print("Missing dependency 'requests'. Install with: pip install requests", file=sys.stderr)
-    raise
+except Exception:
+    # We only need requests for live API calls; sample mode works without it
+    requests = None
 
 
 def masked_token(token: str) -> str:
@@ -56,6 +57,23 @@ def get_current_user(host: str, token: str, timeout: int = 10):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Databricks client (live or sample)')
+    parser.add_argument('--sample', '-s', action='store_true', help='Print sample user data instead of calling the API')
+    parser.add_argument('--sample-file', default=os.path.join(os.path.dirname(__file__), 'sample_user.json'), help='Path to sample JSON file')
+    args = parser.parse_args()
+
+    if args.sample:
+        sample_path = args.sample_file
+        try:
+            with open(sample_path, 'r') as f:
+                sample = json.load(f)
+        except Exception as e:
+            print(f"Failed to read sample file '{sample_path}': {e}", file=sys.stderr)
+            sys.exit(1)
+        print(f"Using sample file: {sample_path}")
+        print(json.dumps(sample, indent=2))
+        sys.exit(0)
+
     host = os.environ.get('DATABRICKS_HOST', '').strip()
     token = os.environ.get('DATABRICKS_TOKEN', '').strip()
 
@@ -68,6 +86,10 @@ if __name__ == '__main__':
     if not token:
         print("Error: DATABRICKS_TOKEN is not set. Export it and run again.", file=sys.stderr)
         sys.exit(2)
+
+    if requests is None:
+        print("Missing dependency 'requests'. Install with: pip install requests", file=sys.stderr)
+        sys.exit(1)
 
     try:
         user = get_current_user(host, token)
